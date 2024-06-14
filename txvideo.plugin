@@ -1,0 +1,508 @@
+/**
+*@file       腾讯视频
+*@desp       本脚本仅适用于腾讯视频及体育会员每日签到，仅测试Loon
+*@env        txspCookie、txspRefreshCookie、txspRefreshBody、dayOfGetMonthTicket、isSkipTxspCheckIn、isLottery
+*@author     WowYiJiu
+*@updated    2024-6-14
+*@version    v1.0.1
+*@link       https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js
+
+🌟 环境变量说明
+txspCookie：腾讯视频app的Cookie
+txspRefreshCookie、txspRefreshBody：腾讯视频网页NewRefresh接口中的数据，用来刷新Cookie中的vqq_vusession
+dayOfGetMonthTicket：每月几号领取每月球票，默认为每月1号
+isSkipTxspCheckIn：值域[true, false] 默认为false表示正常进行腾讯视频会员签到，用于特殊情况下（账号需要获取短信验证码或者需要过滑块验证码）时开启
+isLottery: 值域[true, false] 默认为false表示不抽奖，抽抽乐于2024年2月29日10点下线，建议不开启，反正也抽不到
+
+❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖
+
+详细功能：
+🔵 腾讯视频会员签到领V力值
+🔵 腾讯体育会员签到领热爱值
+🔵 腾讯体育领取每日球票
+🔵 腾讯体育领取每月球票
+
+📌 获取Cookie：（重写需要获取3个值：txspCookie、txspRefreshCookie、txspRefreshBody)
+- 进入腾讯视频app，点击右下角我的，点击头像下的视频VIP进入会员中心看到系统消息提示获取txspCookie成功即可
+- 浏览器进入腾讯视频网页版，登录后切换成桌面版，刷新网页看到系统消息提示获取txspRefreshCookie、txspRefreshBody成功即可
+- 获取Cookie后, 请将Cookie脚本禁用并移除主机名，以免产生不必要的MITM
+
+💬 BoxJs订阅：https://raw.githubusercontent.com/WowYiJiu/Personal/main/WowYiJiu.box.json
+
+⚙ 配置 (Loon)
+[MITM]
+hostname = vip.video.qq.com, pbaccess.video.qq.com
+
+[Script]
+http-request https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList? script-path=https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js, requires-body=true, timeout=10, tag=腾讯视频Cookie获取
+http-request https://pbaccess.video.qq.com/trpc.videosearch.hot_rank.HotRankServantHttp/HotRankHttp script-path=https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js, requires-body=true, timeout=10, tag=腾讯视频Cookie获取
+http-request https://pbaccess.video.qq.com/trpc.video_account_login.web_login_trpc.WebLoginTrpc/NewRefresh script-path=https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js, requires-body=true, timeout=10, tag=腾讯视频Cookie获取
+
+cron "5 7 * * *" script-path=https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js, tag=腾讯视频签到
+*/
+
+const $ = new Env("腾讯视频");
+
+let txspCookie = ($.isNode() ? process.env.txspCookie : $.getdata('txspCookie')) || "";
+let txspRefreshCookie = ($.isNode() ? process.env.txspRefreshCookie : $.getdata('txspRefreshCookie')) || "";
+let txspRefreshBody = ($.isNode() ? process.env.txspRefreshBody  : $.getdata('txspRefreshBody')) || "";
+let dayOfGetMonthTicket = ($.isNode() ? process.env.dayOfGetMonthTicket : $.getdata('dayOfGetMonthTicket')) || 1;
+let isSkipTxspCheckIn = $.isNode() ? process.env.isSkipTxspCheckIn : (($.getdata('isSkipTxspCheckIn') !== undefined && $.getdata('isSkipTxspCheckIn') !== '') ? JSON.parse($.getdata('isSkipTxspCheckIn')) : false);
+let isLottery = $.isNode() ? process.env.isLottery : (($.getdata('isLottery') !== undefined && $.getdata('isLottery') !== '') ? JSON.parse($.getdata('isLottery')) : false);
+
+const Notify = 1; //0为关闭通知,1为打开通知,默认为1
+const notify = $.isNode() ? require("./sendNotify") : "";
+
+let currentVersion = "v1.0.1", latestVersion = "";
+let nickname = "";
+let isTxspVip = false, isTxspSvip = false, isTxSportsVip = false, isTxSportsSvip = false;
+let endTime = "", svipEndTime = "", txSportsEndTime = "", txSportsSvipEndTime = "";
+let level = "", txSportsLevel = "";
+let score = "", txSportsScore = "";
+let month_received_score = "", month_limit = "";
+let isTxspCheckIn = "", isTxSportsCheckIn = "";
+
+let txspCookieKeys = ['app_ver', 'main_login', 'video_platform', 'vqq_access_token', 'vqq_appid', 'vqq_openid', 'vqq_vuserid', 'vqq_vusession'];
+let txspRefreshCookieKeys = ['main_login', 'vqq_access_token', 'vqq_appid', 'vqq_openid', 'vqq_refresh_token', 'vqq_vusession'];
+
+let originalInfo = $.info;
+let originalWarn = $.warn;
+let originalError = $.error;
+let message = "";
+$.desc = "";
+$.info=function(message){originalInfo.call($,message);$.desc+=message+"\n"};$.warn=function(message){originalWarn.call($,message);$.desc+=message+"\n"};$.error=function(message){originalError.call($,message);$.desc+=message+"\n"};
+
+if ((isGetCookie = typeof $request !== `undefined`)) {
+	getCookie();
+	$.done();
+} else if (!$.isNode() && !txspCookie){
+	$.msg($.name, "您未获取腾讯视频Cookie", "点击此条跳转到腾讯视频获取Cookie", { 'open-url': 'tenvideo://', 'media-url': 'https://raw.githubusercontent.com/WowYiJiu/Personal/main/icon/videoqq.png' });
+	$.done();
+} else {
+	!(async () => {
+		$.log(`                               _  _ _         `);
+		$.log(`  __      _______      ___   _(_)(_|_)_   _   `);
+		$.log(`  \\ \\ /\\ / / _ \\ \\ /\\ / / | | | || | | | | |  `);
+		$.log(`   \\ \V  \V / (_) \\ \V  \V /| |_| | || | | |_| |  `);
+		$.log(`    \\_/\\_/ \\___/ \\_/\\_/  \\__, |_|/ |_|\\__,_|  `);
+		$.log(`                         |___/ |__/           `);
+		await getNotice();
+		await getVersion();
+		$.log(`\n当前版本：${currentVersion}  最新版本：${latestVersion}\n`);
+		$.version = `\n当前版本：${currentVersion}  最新版本：${latestVersion}\n`;
+		if(!txspCookie){
+			$.warn(`未填写txspCookie环境变量`);
+			return;
+		}
+		if ($.isNode()){
+			txspCookie = extractValues(txspCookie, txspCookieKeys);
+			txspRefreshCookie = extractValues(txspRefreshCookie, txspRefreshCookieKeys);
+		}
+		$.info("---- 开始 刷新vqq_vusession ----");
+		await refresh_vqq_vusession();
+		$.info(`--------- 结束 ---------\n`);
+		$.info(`用户昵称：${nickname}`);
+		await getVipInfo();
+		if (isTxspVip){
+			$.info(`---- 腾讯视频VIP信息 ----`);
+			if (isTxspSvip){
+				$.info(`当前是腾讯视频SVIP`);
+			} else {
+				$.info(`当前是腾讯视频VIP`);
+			}
+			$.info(`当前等级：${level}`);
+			$.info(`当前成长：${score}`);
+			if (isTxspSvip){
+				$.info(`SVIP到期时间：${svipEndTime}`);
+			}
+			$.info(`VIP到期时间：${endTime}`);
+			$.info(`--------- 结束 ---------\n`);
+		}
+		if (isTxSportsVip){
+			$.info(`--- 腾讯体育VIP信息 ---`);
+			if (isTxSportsSvip){
+				$.info(`当前是腾讯体育超级VIP`);
+			} else {
+				$.info(`当前是腾讯体育VIP`);
+			}
+			$.info(`当前等级：${txSportsLevel}`);
+			$.info(`当前成长：${txSportsScore}`);
+			if (isTxSportsSvip){
+				$.info(`超级VIP到期时间：${txSportsSvipEndTime}`);
+			}
+			$.info(`VIP到期时间：${txSportsEndTime}`);
+			$.info(`--------- 结束 ---------\n`);
+		}
+		if (!isSkipTxspCheckIn){
+			await txspCheckIn();
+			await txSportsCheckIn();
+			if ($.time('dd') == dayOfGetMonthTicket){
+				await getMonthTicket();
+			}
+			if (isLottery){
+				await LotteryDraw();
+			}
+		}
+		if ($.desc !== ""){
+			$.msg($.name, "","", {
+				"open-url": "tenvideo://",
+				"media-url": "https://raw.githubusercontent.com/WowYiJiu/Personal/main/icon/videoqq.png"
+			});
+			if (Notify > 0) {
+				notify.sendNotify($.name, $.desc);
+			}
+		}
+	})();
+	$.done();
+}
+
+function refresh_vqq_vusession(){
+	return new Promise(resolve => {
+		$.post({
+			url: "https://pbaccess.video.qq.com/trpc.video_account_login.web_login_trpc.WebLoginTrpc/NewRefresh",
+			headers: {
+				'Cookie': txspRefreshCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			body: txspRefreshBody,
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`刷新vqq_vusession失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						for (const key of Object.keys(result.data)){
+							if (txspCookieKeys.indexOf(key) !== -1){
+								txspCookie = txspCookie.replace(new RegExp(`${key}=([^;]*)`), `${key}=${result.data[key]}`);
+							}
+						}
+						nickname = result.data.nickname;
+						$.info(`刷新vqq_vusession成功\n`);
+					} else {
+						$.warn(`刷新vqq_vusession失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function getVipInfo(){
+	return new Promise(resolve => {
+		$.get({
+			url: "https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList?isMain=true",
+			headers: {
+				'Cookie': txspCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`获取VIP信息失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						isTxspVip = result.data.txsp_vip;
+						isTxspSvip = result.data.txsp_svip;
+						isTxSportsVip = result.data.txSports_vip;
+						isTxSportsSvip = result.data.txSports_svip;
+						endTime = result.data.endTime;
+						svipEndTime = result.data.svipEndTime;
+						txSportsEndTime = result.data.txSportsEndTime;
+						txSportsSvipEndTime = result.data.txSportsSvipEndTime;
+						level = result.data.level;
+						txSportsLevel = result.data.txSportsLevel;
+						score = result.data.score;
+						txSportsScore = result.data.txSportsScore;
+						month_received_score = result.data.month_received_score;
+						month_limit = result.data.month_limit;
+						$.info(`获取VIP信息成功\n`);
+					} else {
+						$.warn(`获取VIP信息失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function txspCheckIn(){
+	return new Promise(resolve => {
+		$.post({
+			url: "https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList",
+			headers: {
+				'Cookie': txspCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			body: '{"areaCode": 1, "areaId": 1, "isMain": true}',
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`腾讯视频签到失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						isTxspCheckIn = result.data.isCheckIn;
+						$.info(`腾讯视频签到成功\n`);
+					} else {
+						$.warn(`腾讯视频签到失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function txSportsCheckIn(){
+	return new Promise(resolve => {
+		$.post({
+			url: "https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList",
+			headers: {
+				'Cookie': txspCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			body: '{"areaCode": 1, "areaId": 2, "isMain": true}',
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`腾讯体育签到失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						isTxSportsCheckIn = result.data.isCheckIn;
+						$.info(`腾讯体育签到成功\n`);
+					} else {
+						$.warn(`腾讯体育签到失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function getMonthTicket(){
+	return new Promise(resolve => {
+		$.post({
+			url: "https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList",
+			headers: {
+				'Cookie': txspCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			body: '{"areaCode": 1, "areaId": 3, "isMain": true}',
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`领取每月球票失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						$.info(`领取每月球票成功\n`);
+					} else {
+						$.warn(`领取每月球票失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function LotteryDraw(){
+	return new Promise(resolve => {
+		$.post({
+			url: "https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList",
+			headers: {
+				'Cookie': txspCookie,
+				'Referer': 'https://v.qq.com',
+				'Content-Type': 'application/json'
+			},
+			body: '{"areaCode": 1, "areaId": 4, "isMain": true}',
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`抽奖失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.errcode === 0 && result.errmsg === "OK") {
+						$.info(`抽奖成功\n`);
+					} else {
+						$.warn(`抽奖失败：${JSON.stringify(result)}`);
+					}
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function extractValues(cookie, keys){
+	let result = [];
+	for (const key of keys){
+		let regex = new RegExp(`${key}=([^;]*)`);
+		let match = regex.exec(cookie);
+		if (match){
+			result.push(`${key}=${match[1]}`);
+		}
+	}
+	return result.join("; ");
+}
+
+function getNotice(){
+	return new Promise(resolve => {
+		$.get({
+			url: "https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/notice.json",
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`获取公告失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.notice){
+						$.msg($.name, `公告`, `${result.notice}`);
+					}
+					$.info(`获取公告成功\n`);
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function getVersion(){
+	return new Promise(resolve => {
+		$.get({
+			url: "https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/version.json",
+			timeout: 30000
+		}, (error, response, data) => {
+			try {
+				if (error) {
+					$.warn(`获取版本信息失败\n${JSON.stringify(error)}`);
+				} else {
+					let result = JSON.parse(data);
+					if (result.version){
+						latestVersion = result.version;
+					}
+					$.info(`获取版本信息成功\n`);
+				}
+			} catch (e) {
+				$.error(e);
+			} finally {
+				resolve();
+			}
+		});
+	});
+}
+
+function Env(t, e) {
+    class s {
+        constructor(t) {
+            this.env = t
+        }
+        send(t, e = "GET") {
+            t = "string" == typeof t ? {
+                url: t
+            } : t;
+            let s = this.get;
+            return "POST" === e && (s = this.post), new Promise((e, i) => {
+                s.call(this, t, (t, s, r) => {
+                    t ? i(t) : e(s)
+                })
+            })
+        }
+        get(t) {
+            return this.send.call(this.env, t)
+        }
+        post(t) {
+            return this.send.call(this.env, t, "POST")
+        }
+    }
+    return new class {
+        constructor(t, e) {
+            this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.encoding = "utf-8", this.startTime = (new Date).getTime(), Object.assign(this, e), this.log("", `🔔${this.name}, 开始!`)
+        }
+        isNode() {
+            return "undefined" != typeof module && !!module.exports
+        }
+        log(t, e) {
+            this.logs = [...this.logs, "", t, e].filter(Boolean)
+        }
+        info(t) {
+            this.log(t)
+        }
+        warn(t) {
+            this.log(t)
+        }
+        error(t) {
+            this.log(t)
+        }
+        getdata(t) {
+            let e = this.getval(t);
+            if (/^@/.test(t)) {
+                const [, s, r] = /^@(.*?)\.(.*?)$/.exec(t), i = s ? this.getval(s) : "";
+                if (i) {
+                    try {
+                        const t = JSON.parse(i);
+                        e = t ? this.lodash_get(t, r, "") : e
+                    } catch (t) {
+                        e = ""
+                    }
+                }
+            }
+            return e
+        }
+        getval(t) {
+            return this.isSurge() || this.isLoon() ? $persistentStore.read(t) : this.isQuanX() ? $prefs.valueForKey(t) : this.isNode() ? (this.data = this.loaddata(), this.data[t]) : this.data && this.data[t] || null
+        }
+        isSurge() {
+            return "undefined" != typeof $httpClient && "undefined" != typeof $loon
+        }
+        isLoon() {
+            return "undefined" != typeof $loon
+        }
+        isQuanX() {
+            return "undefined" != typeof $task
+        }
+        done(t = {}) {
+            const e = (new Date).getTime(), s = (e - this.startTime) / 1e3;
+            this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`), this.log(), (this.isSurge() || this.isLoon() || this.isQuanX()) && $done(t)
+        }
+    }(t, e)
+}
