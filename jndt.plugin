@@ -1,0 +1,7 @@
+[Rewrite]
+
+^https:\/\/app\.jngdjt\.cn\:8889\/app\/carouselPicture\/getCarouselPictureList response-body-json-del list
+^https:\/\/app\.jngdjt\.cn\:8889\/app\/AppEmergen\/UrgentInfo response-body-json-del list
+
+[Mitm]
+hostname = app.jngdjt.cn
