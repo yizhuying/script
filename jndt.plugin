@@ -1,5 +1,15 @@
-[Rewrite]
+#!name = 济南地铁广告
+#!desc = 移除首页广告，去除banner
+#!openUrl = https://apps.apple.com/cn/app/id1450891769
+#!author = 清风拂柳
+#!keyword = 去广告, 清风拂柳
+#!homepage = https://gitlab.com/lodepuly/vpn_tool/-/blob/master/README.md
+#!icon = https://raw.githubusercontent.com/ZeroBugHero/script/main/image/jndt.webp
+#!date = 2024-08-09 08:38:00
 
+
+
+[Rewrite]
 ^https:\/\/app\.jngdjt\.cn\:8889\/app\/carouselPicture\/getCarouselPictureList response-body-json-del list
 ^https:\/\/app\.jngdjt\.cn\:8889\/app\/AppEmergen\/UrgentInfo response-body-json-del list
 
