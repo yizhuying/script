@@ -1,7 +1,7 @@
 #!name=解除GitHub限速
 #!desc=速率限制返回429问题
 #!author=清风扶柳
-#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/JD.png
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/refs/heads/main/App_icon/1024px/GitHub.png120px/JD.png
 #!date=2025-04-29
 
 [Rewrite]
