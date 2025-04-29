@@ -1,3 +1,7 @@
+#!name=解除GitHub限速
+#!desc=速率限制返回429问题
+
+
 [Rewrite]
 # 解决github速率限制返回429问题
 ^https:\/\/(raw|gist)\.githubusercontent\.com\/ header-replace Accept-Language en-us
