@@ -1,0 +1,9 @@
+#!name=移除微信公众号文章底栏都在搜
+#!desc=移除微信公众号文章底栏都在搜
+#!author=清风扶柳
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/refs/heads/main/App_icon/120px/Weixin.pngmain/App_icon/1024px/GitHub.png
+#!date=2025-05-08
+
+[Rewrite]
+# 移除微信公众号文章底栏都在搜
+^https:\/\/mp\.weixin\.qq\.com\/mp\/relatedsearchword reject-dict
