@@ -2,7 +2,7 @@
 #!desc=速率限制返回429问题
 #!author=清风扶柳
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/refs/heads/main/App_icon/1024px/GitHub.png
-#!date=2025-04-29
+#!date=2025-05-08
 
 [Rewrite]
 # 解决github速率限制返回429问题
