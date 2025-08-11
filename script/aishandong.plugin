@@ -8,7 +8,7 @@
 
 
 [Rewrite]
-^https:\/\/web1\.isdapp\.shandong\.gov\.cn\/jpaas-jmportal-web-server\/interface\/startParameterInterface response-body-json-replace data {}
+^https:\/\/web1\.isdapp\.shandong\.gov\.cn\/jpaas-jmportal-web-server\/interface\/startParameterInterface response-body-json-replace data null
 ^https:\/\/web1\.isdapp\.shandong\.gov\.cn\/jpaas-jmportal-web-server\/interface\/startParameterInterface response-body-json-replace messageType 1
 
 [MITM]
