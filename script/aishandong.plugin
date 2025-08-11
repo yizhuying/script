@@ -8,8 +8,8 @@
 
 
 [Rewrite]
-^https:\/\/web1.isdapp.shandong.gov.cn\/jpaas-jmportal-web-server\/interface\/startParameterInterface response-body-json-replace data {}
+^https:\/\/web1\.isdapp\.shandong\.gov\.cn\/jpaas-jmportal-web-server\/interface\/startParameterInterface response-body-json-replace data {}
 
 [MITM]
-hostname = web1.isdapp.shandong.gov.cn
 
+hostname = web1.isdapp.shandong.gov.cn
