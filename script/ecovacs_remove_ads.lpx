@@ -12,7 +12,7 @@
 # 原始底部导航规则：仅保留 Robot / Mine
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
-# 针对 getMyMemberInfo：移除 benefitList、付费引导文案与赠卡信息，并把优惠券数设为 0
+# 仅处理 getMyMemberInfo：清空 benefitList、付费会员引导、赠卡信息，积分和优惠券置空
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/member\/getMyMemberInfo.* response-body-json-jq 'if .data then .data |= (
     (.benefitList = [] ) |
     (.paidMemberInfo |= (.guideTitle = "" , .frozenToast = "" , .guideTitleType = null, .givePaidMemberCardInfo = {} , .paidMemberStatus = "NOT_OPEN")) |
@@ -20,21 +20,6 @@
     (.availableTaskCount = 0) |
     (.integral = "0")
 ) else . end'
-
-# 常见 Banner/推荐/首页促销接口：直接清空 data，返回 success=true（避免 App 报错）
-^https:\/\/gl-cn-api\.ecovacs\.cn\/v\d+\/private\/.*(getBannerList|getRecommendList|getHomePageRecommendList|getHomePromotion|getSpecialTopicList|getRecommend).* response-body-json-jq 'if .data then .data = {} | .success = true else . end'
-
-# 通用“删除含有广告/促销关键词的字段”（更激进）
-^https:\/\/gl-cn-api\.ecovacs\.cn\/.* response-body-json-jq '
-def remove_ads:
-  walk(
-    if type == "object" then
-      with_entries(select(.key | test("(?i)ad|ads|promo|promotion|recommend|banner|mall|shop|market|coupon|couponList|ticket|give|guide") | not))
-    else .
-    end
-  );
-if .data then .data |= remove_ads else . end
-'
 
 [MitM]
 hostname=gl-cn-api.ecovacs.cn
