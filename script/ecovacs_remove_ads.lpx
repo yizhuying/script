@@ -1,7 +1,7 @@
-#!name=Ecovacs 去底部 & 全面去广告 - Aggressive
-#!desc=隐藏底部商城/发现，仅保留机器人和我的；并尝试移除常见广告/推送/促销响应字段
-#!author=自用（改进版）
-#!tag=去Ecovacs, 去广告
+#!name=Ecovacs去广告
+#!desc=隐藏底部商城/发现，仅保留机器人和我的；移除我的中会权益卡片
+#!author=自用
+#!tag=Ecovacs, 去广告
 #!openUrl=https://apps.apple.com/tw/app/ecovacs-home/id1329458504
 #!system=iOS iPadOS
 #!system_version=15
