@@ -1,7 +1,7 @@
 #!name=Ecovacs 去底部广告（只保留 Robot & Mine）
-#!desc=隐藏商城和发现
+#!desc=科沃斯App隐藏商城和发现
 #!author=自用
-#!tag=去广告
+#!tag=去Ecovacs
 #!openUrl=https://apps.apple.com/tw/app/ecovacs-home/id1329458504
 #!system=iOS iPadOS
 #!system_version=15
@@ -17,5 +17,3 @@
 [MitM]
 
 hostname=gl-cn-api.ecovacs.cn,*.ecovacs.cn
-
-#!end
