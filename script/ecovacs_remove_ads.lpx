@@ -15,5 +15,7 @@
 # 仅处理 getMyMemberInfo：清空 benefitList、付费会员引导、赠卡信息，积分和优惠券置空
 #^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/member\/getMyMemberInfo response-body-json-jq 'if .data then .data |= ((.benefitList = [] ) |(.paidMemberInfo |= (.guideTitle = "" , .frozenToast = "" , .guideTitleType = null, .givePaidMemberCardInfo = {} , .paidMemberStatus = "OPEN")) |(.availableTicketCount = 0) |(.availableTaskCount = 0) |(.integral = "0")) else . end'
 
+#^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo 
+
 [MitM]
 hostname=gl-cn-api.ecovacs.cn
