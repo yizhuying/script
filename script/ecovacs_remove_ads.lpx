@@ -16,4 +16,4 @@
 
 [MitM]
 
-hostname=gl-cn-api.ecovacs.cn,*.ecovacs.cn
+hostname=gl-cn-api.ecovacs.cn
