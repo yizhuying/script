@@ -13,7 +13,7 @@
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
 # 仅处理 getMyMemberInfo：清空 benefitList、付费会员引导、赠卡信息，积分和优惠券置空
-^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/member\/getMyMemberInfo response-body-json-jq 'if .data then .data |= ((.benefitList = [] ) |(.paidMemberInfo |= (.guideTitle = "" , .frozenToast = "" , .guideTitleType = null, .givePaidMemberCardInfo = {} , .paidMemberStatus = "NOT_OPEN")) |(.availableTicketCount = 0) |(.availableTaskCount = 0) |(.integral = "0")) else . end'
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/member\/getMyMemberInfo response-body-json-jq 'if .data then .data |= ((.benefitList = [] ) |(.paidMemberInfo |= (.guideTitle = "" , .frozenToast = "" , .guideTitleType = null, .givePaidMemberCardInfo = {} , .paidMemberStatus = "OPEN")) |(.availableTicketCount = 0) |(.availableTaskCount = 0) |(.integral = "0")) else . end'
 
 [MitM]
 hostname=gl-cn-api.ecovacs.cn
