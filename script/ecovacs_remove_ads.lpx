@@ -1,19 +1,40 @@
-#!name=Ecovacs 去底部广告
-#!desc=隐藏商城和发现，仅展示机器人和我的
-#!author=自用
-#!tag=去Ecovacs
+#!name=Ecovacs 去底部 & 全面去广告 - Aggressive
+#!desc=隐藏底部商城/发现，仅保留机器人和我的；并尝试移除常见广告/推送/促销响应字段
+#!author=自用（改进版）
+#!tag=去Ecovacs, 去广告
 #!openUrl=https://apps.apple.com/tw/app/ecovacs-home/id1329458504
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
-#!homepage=
-#!icon=
 #!date=2025-09-28 19:00:00
 
-
 [Rewrite]
+# 原始底部导航规则：仅保留 Robot / Mine
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
-[MitM]
+# 针对 getMyMemberInfo：移除 benefitList、付费引导文案与赠卡信息，并把优惠券数设为 0
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/member\/getMyMemberInfo.* response-body-json-jq 'if .data then .data |= (
+    (.benefitList = [] ) |
+    (.paidMemberInfo |= (.guideTitle = "" , .frozenToast = "" , .guideTitleType = null, .givePaidMemberCardInfo = {} , .paidMemberStatus = "NOT_OPEN")) |
+    (.availableTicketCount = 0) |
+    (.availableTaskCount = 0) |
+    (.integral = "0")
+) else . end'
 
+# 常见 Banner/推荐/首页促销接口：直接清空 data，返回 success=true（避免 App 报错）
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v\d+\/private\/.*(getBannerList|getRecommendList|getHomePageRecommendList|getHomePromotion|getSpecialTopicList|getRecommend).* response-body-json-jq 'if .data then .data = {} | .success = true else . end'
+
+# 通用“删除含有广告/促销关键词的字段”（更激进）
+^https:\/\/gl-cn-api\.ecovacs\.cn\/.* response-body-json-jq '
+def remove_ads:
+  walk(
+    if type == "object" then
+      with_entries(select(.key | test("(?i)ad|ads|promo|promotion|recommend|banner|mall|shop|market|coupon|couponList|ticket|give|guide") | not))
+    else .
+    end
+  );
+if .data then .data |= remove_ads else . end
+'
+
+[MitM]
 hostname=gl-cn-api.ecovacs.cn
