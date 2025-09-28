@@ -1,12 +1,13 @@
 #!name=Ecovacs 去底部广告（只保留 Robot & Mine）
-#!desc=拦截 Ecovacs getBottomNavigateInfoList 接口，使用 response-body-json-jq 只保留 positionType 为 Robot 与 Mine（带存在性检查，避免 App 异常）
+#!desc=隐藏商城和发现
 #!author=自用
 #!tag=去广告
+#!openUrl=https://apps.apple.com/tw/app/ecovacs-home/id1329458504
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
-#!homepage=https://github.com/mist-whisper/Loon
-#!icon=https://static.ecovacs.cn/favicon.ico
+#!homepage=
+#!icon=
 #!date=2025-09-28 19:00:00
 
 
