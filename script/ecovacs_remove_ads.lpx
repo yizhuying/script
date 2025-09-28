@@ -1,0 +1,20 @@
+#!name=Ecovacs 去底部广告（只保留 Robot & Mine）
+#!desc=拦截 Ecovacs getBottomNavigateInfoList 接口，使用 response-body-json-jq 只保留 positionType 为 Robot 与 Mine（带存在性检查，避免 App 异常）
+#!author=自用
+#!tag=去广告
+#!system=iOS iPadOS
+#!system_version=15
+#!loon_version=3.2.9(837)
+#!homepage=https://github.com/mist-whisper/Loon
+#!icon=https://static.ecovacs.cn/favicon.ico
+#!date=2025-09-28 19:00:00
+
+
+[Rewrite]
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
+
+[MitM]
+
+hostname=gl-cn-api.ecovacs.cn,*.ecovacs.cn
+
+#!end
