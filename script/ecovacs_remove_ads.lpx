@@ -6,6 +6,7 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
+#!#!icon=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/image/ecovacs_home.JPG
 #!date=2025-09-29 09:30:00
 
 [Argument]
