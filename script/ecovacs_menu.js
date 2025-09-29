@@ -2,7 +2,7 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
- * 时间：10:30
+ * 时间：10:35
  */
 
 let body = $response.body || "{}";
@@ -99,7 +99,9 @@ try {
   }
   console.log("=body=",body);
 
-  $done({ body: JSON.stringify(obj) });
+let finalBody = JSON.stringify(obj);
+  console.log("=final body=", finalBody);   // 打印修改后的内容
+  $done({ body: finalBody });
 } catch (e) {
   console.log("Ecovacs menu parse error:", e);
   $done({ body });
