@@ -8,8 +8,9 @@
 
 let body = $response.body || "{}";
 
-
+let aa=$argument
 console.log("argument:", $argument);
+console.log("aa:", aa);
 
 // 读取 Loon 插件参数
 let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
