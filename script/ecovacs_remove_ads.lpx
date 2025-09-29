@@ -6,7 +6,7 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
-#!date=2025-09-29 12:57:00
+#!date=2025-09-29 13:00:00
 
 [Argument]
 MYORDER = switch, true, tag=我的订单, desc=是否显示「我的订单」
