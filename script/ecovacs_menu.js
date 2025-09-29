@@ -6,6 +6,8 @@
 
 let body = $response.body || "{}";
 
+$notify("===============1============");
+
 // 默认配置（与插件 Argument 默认一致）
 let cfg = {
   MYORDER: true,
