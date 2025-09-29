@@ -1,9 +1,9 @@
 /*
  * Ecovacs 我的页面菜单过滤（Loon）
- * 参数顺序：MYORDER, SERVICEHALL, EXCHANGERECORD, MYACTIVITY, MYGIFTCARD, MYFAVORITE, MYCOMMENT, HELPFEEDBACK, WARRANTYCARD
+ * 读取 [Argument] 开关，动态控制菜单显示
  */
 
-const raw = $response.body || "";
+let body = $response.body || "{}";
 let cfg = {
   MYORDER: true,
   SERVICEHALL: true,
@@ -16,19 +16,18 @@ let cfg = {
   WARRANTYCARD: true
 };
 
-// 解析 argument（形如 "true,false,true,..."）
-try {
-  const args = ($argument || "").split(",").map(s => s.trim());
-  const keys = ["MYORDER","SERVICEHALL","EXCHANGERECORD","MYACTIVITY","MYGIFTCARD","MYFAVORITE","MYCOMMENT","HELPFEEDBACK","WARRANTYCARD"];
-  keys.forEach((k, i) => {
-    if (args[i] === "true" || args[i] === "false") cfg[k] = (args[i] === "true");
-  });
-} catch (e) {
-  console.log("Ecovacs args parse error: " + e);
-}
+// 打印调试参数
+console.log("Ecovacs 参数:", $argument);
 
 try {
-  const obj = JSON.parse(raw);
+  // 将 Loon 传入的开关覆盖默认值
+  Object.keys(cfg).forEach(k => {
+    if ($argument[k] === "true" || $argument[k] === "false") {
+      cfg[k] = ($argument[k] === "true");
+    }
+  });
+
+  let obj = JSON.parse(body);
   if (obj?.data?.menuList && Array.isArray(obj.data.menuList)) {
     obj.data.menuList.forEach(section => {
       if (Array.isArray(section.menuItems)) {
@@ -51,6 +50,6 @@ try {
   }
   $done({ body: JSON.stringify(obj) });
 } catch (e) {
-  console.log("Ecovacs menu parse error: " + e);
-  $done({ body: raw });
+  console.log("Ecovacs menu parse error:", e);
+  $done({ body });
 }
