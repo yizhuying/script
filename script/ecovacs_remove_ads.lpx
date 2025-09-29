@@ -6,7 +6,7 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
-#!date=2025-09-29 09:20:00
+#!date=2025-09-29 09:30:00
 
 [Argument]
 MYORDER = switch, true, tag=我的订单, desc=是否显示「我的订单」
@@ -24,8 +24,8 @@ WARRANTYCARD = switch, true, tag=电子保修卡, desc=是否显示「电子保�
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
 [Script]
-# 我的页面菜单：按 Argument 开关过滤（采用 Loon 标准语法）
-http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/script/ecovacs_menu.js, requires-body=true, binary-body-mode=true, timeout=20, tag=我的页面菜单, argument=[{MYORDER},{SERVICEHALL},{EXCHANGERECORD},{MYACTIVITY},{MYGIFTCARD},{MYFAVORITE},{MYCOMMENT},{HELPFEEDBACK},{WARRANTYCARD}]
+# 我的页面菜单：按 Argument 开关过滤
+http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=ecovacs_menu.js, requires-body=true, tag=Ecovacs菜单
 
 [MitM]
 hostname=gl-cn-api.ecovacs.cn
