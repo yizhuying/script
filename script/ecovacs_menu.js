@@ -21,6 +21,9 @@ let cfg = {
   WARRANTYCARD: true
 };
 
+let aa=$argument;
+console.log("aa:", aa);
+
 // 读取 Loon 插件参数
 let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
 console.log("传入参数:", JSON.stringify(args));
