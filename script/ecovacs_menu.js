@@ -2,10 +2,10 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
+ * 时间：10:22
  */
 
 let body = $response.body || "{}";
-
 
 // 默认配置（与插件 Argument 默认一致）
 let cfg = {
@@ -20,14 +20,18 @@ let cfg = {
   WARRANTYCARD: true
 };
 
-// 覆盖默认值（来自 Loon 插件界面）
+// 读取 Loon 插件参数（安全处理）
+let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
+console.log("传入参数:", JSON.stringify(args));
+
+// 覆盖默认值
 Object.keys(cfg).forEach(k => {
-  if ($argument[k] === "true" || $argument[k] === "false") {
-    cfg[k] = ($argument[k] === "true");
+  if (args[k] === "true" || args[k] === "false") {
+    cfg[k] = (args[k] === "true");
   }
 });
 
-// 打印参数
+// 打印最终配置
 console.log("Ecovacs 参数:", JSON.stringify(cfg));
 
 // clickUri → 配置键映射
@@ -92,9 +96,9 @@ try {
 
   if (removed.length > 0) {
     console.log("已删除菜单项:", removed.join(" | "));
-    $notify("已删除菜单项:", removed.join(" | "));
+    $notify("Ecovacs 菜单过滤", "已删除菜单项", removed.join(" | "));
   }
-$notify(body);
+
   $done({ body: JSON.stringify(obj) });
 } catch (e) {
   console.log("Ecovacs menu parse error:", e);
