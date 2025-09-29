@@ -91,8 +91,9 @@ try {
 
   if (removed.length > 0) {
     console.log("已删除菜单项:", removed.join(" | "));
+    $notify("已删除菜单项:", removed.join(" | "));
   }
-t.push(body);
+$notify(body);
   $done({ body: JSON.stringify(obj) });
 } catch (e) {
   console.log("Ecovacs menu parse error:", e);
