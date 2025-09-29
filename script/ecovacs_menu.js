@@ -2,7 +2,7 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
- * 时间：10:22
+ * 时间：10:27
  */
 
 let body = $response.body || "{}";
@@ -96,7 +96,6 @@ try {
 
   if (removed.length > 0) {
     console.log("已删除菜单项:", removed.join(" | "));
-    $notify("Ecovacs 菜单过滤", "已删除菜单项", removed.join(" | "));
   }
 
   $done({ body: JSON.stringify(obj) });
