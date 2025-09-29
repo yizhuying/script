@@ -7,6 +7,7 @@
 let body = $response.body || "{}";
 
 $notify("===============1============");
+$console.log("调试信息: 脚本已执行");
 
 // 默认配置（与插件 Argument 默认一致）
 let cfg = {
