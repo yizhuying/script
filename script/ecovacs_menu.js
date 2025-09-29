@@ -2,8 +2,9 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
- * 时间：10:35
+ * 时间：10:44
  */
+
 
 let body = $response.body || "{}";
 
@@ -20,7 +21,7 @@ let cfg = {
   WARRANTYCARD: true
 };
 
-// 读取 Loon 插件参数（安全处理）
+// 读取 Loon 插件参数
 let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
 console.log("传入参数:", JSON.stringify(args));
 
@@ -31,27 +32,7 @@ Object.keys(cfg).forEach(k => {
   }
 });
 
-// 打印最终配置
-console.log("Ecovacs 参数:", JSON.stringify(cfg));
-
-// clickUri → 配置键映射
-function uriToKey(uri) {
-  if (!uri) return null;
-  const u = String(uri).trim();
-  switch (u) {
-    case "myOrder": return "MYORDER";
-    case "exchangeRecord": return "EXCHANGERECORD";
-    case "myActivity": return "MYACTIVITY";
-    case "myGiftCard": return "MYGIFTCARD";
-    case "userFavoriteList": return "MYFAVORITE";
-    case "myComment": return "MYCOMMENT";
-    case "helpfbView": return "HELPFEEDBACK";
-    case "warrantyCard": return "WARRANTYCARD";
-    default:
-      if (u.startsWith("https://e-ser.ecovacs.cn/service/")) return "SERVICEHALL";
-      return null;
-  }
-}
+console.log("最终配置:", JSON.stringify(cfg));
 
 try {
   let obj = JSON.parse(body);
@@ -68,16 +49,20 @@ try {
 
   const removed = [];
 
-  // 遍历并删除开关为 false 的对象
+  // 遍历并删除开关为 false 的对象（基于 menuName）
   if (obj?.data?.menuList) {
     obj.data.menuList.forEach(section => {
       if (Array.isArray(section.menuItems)) {
         section.menuItems = section.menuItems.filter(item => {
-          const key = uriToKey(item.clickUri);
-          if (key && cfg[key] === false) {
-            removed.push(item.menuName);
-            return false; // 删除
-          }
+          if (item.menuName === "我的订单" && !cfg.MYORDER) { removed.push(item.menuName); return false; }
+          if (item.menuName === "服务大厅" && !cfg.SERVICEHALL) { removed.push(item.menuName); return false; }
+          if (item.menuName === "兑换记录" && !cfg.EXCHANGERECORD) { removed.push(item.menuName); return false; }
+          if (item.menuName === "我的活动" && !cfg.MYACTIVITY) { removed.push(item.menuName); return false; }
+          if (item.menuName === "我的E享卡" && !cfg.MYGIFTCARD) { removed.push(item.menuName); return false; }
+          if (item.menuName === "我的收藏" && !cfg.MYFAVORITE) { removed.push(item.menuName); return false; }
+          if (item.menuName === "我的评论" && !cfg.MYCOMMENT) { removed.push(item.menuName); return false; }
+          if (item.menuName === "帮助与反馈" && !cfg.HELPFEEDBACK) { removed.push(item.menuName); return false; }
+          if (item.menuName === "电子保修卡" && !cfg.WARRANTYCARD) { removed.push(item.menuName); return false; }
           return true; // 保留
         });
       }
@@ -96,13 +81,15 @@ try {
 
   if (removed.length > 0) {
     console.log("已删除菜单项:", removed.join(" | "));
+    $notify("Ecovacs 菜单过滤", "已删除菜单项", removed.join(" | "));
   }
-  console.log("=body=",body);
 
-let finalBody = JSON.stringify(obj);
-  console.log("=final body=", finalBody);   // 打印修改后的内容
+  let finalBody = JSON.stringify(obj);
+  console.log("=final body head=", finalBody.slice(0, 500)); // 打印前500字符，避免日志过长
   $done({ body: finalBody });
+
 } catch (e) {
   console.log("Ecovacs menu parse error:", e);
   $done({ body });
 }
+
