@@ -8,21 +8,8 @@
 
 let body = $response.body || "{}";
 
-// 默认配置（与插件 Argument 默认一致）
-let cfg = {
-  MYORDER: true,
-  SERVICEHALL: true,
-  EXCHANGERECORD: true,
-  MYACTIVITY: true,
-  MYGIFTCARD: false,
-  MYFAVORITE: true,
-  MYCOMMENT: true,
-  HELPFEEDBACK: true,
-  WARRANTYCARD: true
-};
 
-let aa=$argument;
-console.log("aa:", aa);
+console.log("argument:", $argument);
 
 // 读取 Loon 插件参数
 let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
