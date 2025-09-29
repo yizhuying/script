@@ -8,8 +8,8 @@
 
 let body = $response.body || "{}";
 
-let aa=$argument
-console.log("argument:", $argument);
+let aa=$argument.MYORDER
+console.log("MYORDER:", $argument.MYORDER);
 console.log("aa:", aa);
 
 // 读取 Loon 插件参数
