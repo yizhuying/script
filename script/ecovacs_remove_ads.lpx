@@ -10,15 +10,15 @@
 #!date=2025-10.09 13:58:00
 
 [Argument]
-myOrder = switch, true,tag=我的订单
-serviceHall=switch, true,tag=服务大厅
-exchangeRecord=switch, true,tag=兑换记录
-activity=switch, true,tag=我的活动
-enjoyCard=switch, true,tag=我的E享卡
-collections=switch, true,tag=我的收藏
-myComment=switch, true,tag=我的评论
-helpAndFeedback=switch, true,tag=帮助与反馈
-electronicWarrantyCard=switch, true,tag=电子保修卡
+myOrder = switch, true,tag=[显示]我的订单
+serviceHall=switch, true,tag=[显示]服务大厅
+exchangeRecord=switch, true,tag=[显示]兑换记录
+activity=switch, true,tag=[显示]我的活动
+enjoyCard=switch, true,tag=[显示]我的E享卡
+collections=switch, true,tag=[显示]我的收藏
+myComment=switch, true,tag=[显示]我的评论
+helpAndFeedback=switch, true,tag=[显示]帮助与反馈
+electronicWarrantyCard=switch, true,tag=[显示]电子保修卡
 
 [Rewrite]
 # 底部导航：仅保留 Robot / Mine
