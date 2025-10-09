@@ -10,6 +10,7 @@ const isNetEase= true;
 const MyOrder=$argument?.myOrder;
   
 if (MyOrder){
+  onsole.log("-------------------：");
    $notification.post("MyOrder的值为true", "MyOrder", “true”);
 }
   
