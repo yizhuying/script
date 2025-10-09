@@ -6,26 +6,27 @@
 #!system=iOS iPadOS
 #!system_version=15
 #!loon_version=3.2.9(837)
-#!date=2025-09-29 13:03:00
+#!date=2025-09-29 16:14:00
 
 [Argument]
-MYORDER = switch, true, tag=我的订单, desc=是否显示「我的订单」
-SERVICEHALL = switch, true, tag=服务大厅, desc=是否显示「服务大厅」
-EXCHANGERECORD = switch, true, tag=兑换记录, desc=是否显示「兑换记录」
-MYACTIVITY = switch, true, tag=我的活动, desc=是否显示「我的活动」
-MYGIFTCARD = switch, false, tag=我的E享卡, desc=是否显示「我的E享卡」
-MYFAVORITE = switch, true, tag=我的收藏, desc=是否显示「我的收藏」
-MYCOMMENT = switch, true, tag=我的评论, desc=是否显示「我的评论」
-HELPFEEDBACK = switch, true, tag=帮助与反馈, desc=是否显示「帮助与反馈」
-WARRANTYCARD = switch, true, tag=电子保修卡, desc=是否显示「电子保修卡」
+myOrder = switch, true,tag=我的订单
+serviceHall=switch, true,tag=服务大厅
+exchangeRecord=switch, true,tag=兑换记录
+activity=switch, true,tag=我的活动
+enjoyCard=switch, true,tag=我的E享卡
+collections=switch, true,tag=我的收藏
+myComment=switch, true,tag=我的评论
+helpAndFeedback=switch, true,tag=帮助与反馈
+electronicWarrantyCard=switch, true,tag=电子保修卡
 
 [Rewrite]
 # 底部导航：仅保留 Robot / Mine
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
-
+[Script]
 # 我的页面菜单：按 Argument 开关过滤
-http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/script/ecovacs_menu.js, requires-body=true, tag=Ecovacs菜单, argument="[{MYORDER},{SERVICEHALL},{EXCHANGERECORD},{MYACTIVITY},{MYGIFTCARD},{MYFAVORITE},{MYCOMMENT},{HELPFEEDBACK},{WARRANTYCARD}]",enable=true
+http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/script/ecovacs_menu.js, requires-body=true, tag=Ecovacs菜单, argument=[{myOrder},{serviceHall},{exchangeRecord},{activity},{enjoyCard},{collections},{myComment},{helpAndFeedback},{electronicWarrantyCard}]
+
 
 [MitM]
 hostname=gl-cn-api.ecovacs.cn
