@@ -2,14 +2,17 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
- * 时间：16:58
+ * 时间：11:24
  */
 
 
 let body = $response.body || "{}";
 
-let aa = $argument.MYORDER
-console.log("aa:", aa);
+// let aa = $argument.MYORDER
+// console.log("aa:", aa);
+
+const cookie = $argument?.Cookie;
+console.log("✅ 网易云音乐会员已解锁 🎉","cookie");
 
 // 读取 Loon 插件参数
 let args = (typeof $argument !== "undefined" && $argument) ? $argument : {};
