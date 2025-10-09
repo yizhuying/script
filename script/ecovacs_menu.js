@@ -1,59 +1,51 @@
 /*
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
- * 开关为 true → 保留
- * 开关为 false → 删除
- * 时间：1328
+ * ✅ 传入的 $argument 为布尔类型：
+ *    true  → 保留
+ *    false → 删除
+ * 日期：2025-10-09 13:56
  */
-
-const MyOrder = $argument?.myOrder === "true";
-const ServiceHall = $argument?.serviceHall === "true";
-const ExchangeRecord = $argument?.exchangeRecord === "true";
-const Activity = $argument?.activity === "true";
-const EnjoyCard = $argument?.enjoyCard === "true";
-const Collections = $argument?.collections === "true";
-const MYComment = $argument?.myComment === "true";
-const HelpAndFeedback = $argument?.helpAndFeedback === "true";
-const ElectronicWarrantyCard = $argument?.electronicWarrantyCard === "true";
 
 const menuBody = $response.body;
 const menu = JSON.parse(menuBody);
 
-function filterMenuItems(menuItems) {
-    return menuItems.filter(item => {
-        switch (item.clickUri) {
-            case "myOrder":
-                return MyOrder;
-            case "https://e-ser.ecovacs.cn/service/":
-                return ServiceHall;
-            case "exchangeRecord":
-                return ExchangeRecord;
-            case "myActivity":
-                return Activity;
-            case "myGiftCard":
-                return EnjoyCard;
-            case "userFavoriteList":
-                return Collections;
-            case "myComment":
-                return MYComment;
-            case "helpfbView":
-                return HelpAndFeedback;
-            case "warrantyCard":
-                return ElectronicWarrantyCard;
-            default:
-                return true; // 未定义的菜单默认保留
-        }
-    });
-}
+// ✅ 读取 $argument
+const args = {
+    myOrder: $argument?.myOrder,
+    serviceHall: $argument?.serviceHall,
+    exchangeRecord: $argument?.exchangeRecord,
+    activity: $argument?.activity,
+    enjoyCard: $argument?.enjoyCard,
+    collections: $argument?.collections,
+    myComment: $argument?.myComment,
+    helpAndFeedback: $argument?.helpAndFeedback,
+    electronicWarrantyCard: $argument?.electronicWarrantyCard,
+};
 
-// 执行过滤逻辑
-menu.data.menuList.forEach(section => {
-    section.menuItems = filterMenuItems(section.menuItems);
+// ✅ clickUri 与参数键名映射
+const uriMap = {
+    "myOrder": "myOrder",
+    "https://e-ser.ecovacs.cn/service/": "serviceHall",
+    "exchangeRecord": "exchangeRecord",
+    "myActivity": "activity",
+    "myGiftCard": "enjoyCard",
+    "userFavoriteList": "collections",
+    "myComment": "myComment",
+    "helpfbView": "helpAndFeedback",
+    "warrantyCard": "electronicWarrantyCard",
+};
+
+// ✅ 遍历并按布尔开关过滤
+menu.data.menuList.forEach(group => {
+    group.menuItems = group.menuItems.filter(item => {
+        const key = uriMap[item.clickUri];
+        // 没有映射项 → 默认保留
+        if (!key) return true;
+        // 参数为 false → 删除
+        if (args[key] === false) return false;
+        // 参数为 true 或未定义 → 保留
+        return true;
+    });
 });
 
-// 输出通知与日志
-const filteredCount = menu.data.menuList.reduce((sum, sec) => sum + sec.menuItems.length, 0);
-console.log(`[Ecovacs] 过滤后剩余菜单项数量：${filteredCount}`);
-$notification.post("Ecovacs菜单过滤", "过滤完成", `剩余 ${filteredCount} 个菜单项`);
-
-// 返回修改后的响应体
-$done({body: JSON.stringify(menu)});
+$done({ body: JSON.stringify(menu) });
