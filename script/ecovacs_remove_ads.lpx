@@ -1,12 +1,13 @@
 #!name=Ecovacs去广告
 #!desc=隐藏底部商城/发现，仅保留机器人和我的；「我的」页面菜单可配置显示
-#!author=自用
+#!author=https://github.com/yizhuying
+#!icon=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/image/ecovacs_home.JPG
 #!tag=Ecovacs, 去广告
 #!openUrl=https://apps.apple.com/app/ecovacs-home/id1329458504
 #!system=iOS iPadOS
 #!system_version=15
-#!loon_version=3.2.9(837)
-#!date=2025-09-29 16:14:00
+#!loon_version=3.2.4(787)
+#!date=2025-10.09 13:58:00
 
 [Argument]
 myOrder = switch, true,tag=我的订单
@@ -25,7 +26,7 @@ electronicWarrantyCard=switch, true,tag=电子保修卡
 
 [Script]
 # 我的页面菜单：按 Argument 开关过滤
-http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/script/ecovacs_menu.js, requires-body=true, tag=Ecovacs菜单, argument=[{myOrder},{serviceHall},{exchangeRecord},{activity},{enjoyCard},{collections},{myComment},{helpAndFeedback},{electronicWarrantyCard}]
+http-response ^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getUserMenuInfo script-path=https://raw.githubusercontent.com/yizhuying/script/refs/heads/main/script/ecovacs_menu.js, requires-body=true, tag=Ecovacs个人中心菜单, argument=[{myOrder},{serviceHall},{exchangeRecord},{activity},{enjoyCard},{collections},{myComment},{helpAndFeedback},{electronicWarrantyCard}]
 
 
 [MitM]
