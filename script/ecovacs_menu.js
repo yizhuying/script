@@ -2,18 +2,16 @@
  * Ecovacs 我的页面菜单过滤（根据 Argument 开关删除对象）
  * 开关为 true → 保留
  * 开关为 false → 删除
- * 时间：12:37
+ * 时间：1328
  */
 
 const isNetEase= true;
 
 const MyOrder=$argument?.myOrder;
-  
-if (MyOrder){
-  onsole.log("-------------------：");
-   $notification.post("MyOrder的值为true", "MyOrder", “true”);
+if (MyOrder) {
+  console.log("-------------------：");
+  $notification.post("MyOrder的值为true", "MyOrder", "true");
 }
-  
 
 if (isNetEase) {
   // 从 Loon 脚本参数中读取配置
