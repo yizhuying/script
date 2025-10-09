@@ -9,7 +9,7 @@ const isNetEase= true;
 
 const MyOrder=$argument?.myOrder;
   
-if (myOrder){
+if (MyOrder){
    $notification.post("MyOrder的值为true", "MyOrder", “true”);
 }
   
