@@ -5,42 +5,55 @@
  * 时间：1328
  */
 
-const isNetEase= true;
+const MyOrder = $argument?.myOrder === "true";
+const ServiceHall = $argument?.serviceHall === "true";
+const ExchangeRecord = $argument?.exchangeRecord === "true";
+const Activity = $argument?.activity === "true";
+const EnjoyCard = $argument?.enjoyCard === "true";
+const Collections = $argument?.collections === "true";
+const MYComment = $argument?.myComment === "true";
+const HelpAndFeedback = $argument?.helpAndFeedback === "true";
+const ElectronicWarrantyCard = $argument?.electronicWarrantyCard === "true";
 
-const MyOrder=$argument?.myOrder;
-if (MyOrder) {
-  console.log("-------------------：");
-  $notification.post("MyOrder的值为true", "MyOrder", "true");
+const menuBody = $response.body;
+const menu = JSON.parse(menuBody);
+
+function filterMenuItems(menuItems) {
+    return menuItems.filter(item => {
+        switch (item.clickUri) {
+            case "myOrder":
+                return MyOrder;
+            case "https://e-ser.ecovacs.cn/service/":
+                return ServiceHall;
+            case "exchangeRecord":
+                return ExchangeRecord;
+            case "myActivity":
+                return Activity;
+            case "myGiftCard":
+                return EnjoyCard;
+            case "userFavoriteList":
+                return Collections;
+            case "myComment":
+                return MYComment;
+            case "helpfbView":
+                return HelpAndFeedback;
+            case "warrantyCard":
+                return ElectronicWarrantyCard;
+            default:
+                return true; // 未定义的菜单默认保留
+        }
+    });
 }
 
-if (isNetEase) {
-  // 从 Loon 脚本参数中读取配置
-  const cookie = $argument?.Cookie;
-  const mconfig = $argument?.MConfigInfo;
-  const userAgent = $argument?.UserAgent;
+// 执行过滤逻辑
+menu.data.menuList.forEach(section => {
+    section.menuItems = filterMenuItems(section.menuItems);
+});
 
+// 输出通知与日志
+const filteredCount = menu.data.menuList.reduce((sum, sec) => sum + sec.menuItems.length, 0);
+console.log(`[Ecovacs] 过滤后剩余菜单项数量：${filteredCount}`);
+$notification.post("Ecovacs菜单过滤", "过滤完成", `剩余 ${filteredCount} 个菜单项`);
 
-  // 检查参数是否缺失
-  if (!cookie || !mconfig || !userAgent) {
-        console.log("参数缺失信息：");
-    if (!cookie) console.log("❌ Cookie 参数缺失");
-    if (!mconfig) console.log("❌ MConfigInfo 参数缺失");
-    if (!userAgent) console.log("❌ UserAgent 参数缺失");
-    
-    console.log("cookie的值：",cookie);
-    $notification.post("cookie的值", "cookie", cookie);
-    $done({});
-  } else {
-    header["cookie"] = cookie;
-    header["mconfig-info"] = mconfig;
-    header["user-agent"] = userAgent;
-
-
-    console.log("cookie:",cookie);
-    
-    console.log("✅ 网易云音乐会员已解锁 🎉");
-    $done({ headers: header });
-  }
-} else {
-  $done({});
-}
+// 返回修改后的响应体
+$done({body: JSON.stringify(menu)});
