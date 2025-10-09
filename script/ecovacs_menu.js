@@ -21,6 +21,7 @@ if (isNetEase) {
     if (!userAgent) console.log("❌ UserAgent 参数缺失");
     
     $notification.post("网易云音乐遇到问题", "参数缺失", "请在插件内填入会员数据");
+    $notification.post("cookie的值", "cookie", cookie);
     $done({});
   } else {
     header["cookie"] = cookie;
