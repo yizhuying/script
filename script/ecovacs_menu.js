@@ -7,11 +7,19 @@
 
 const isNetEase= true;
 
+const MyOrder=$argument?.myOrder;
+  
+if (myOrder){
+   $notification.post("MyOrder的值为true", "MyOrder", “true”);
+}
+  
+
 if (isNetEase) {
   // 从 Loon 脚本参数中读取配置
   const cookie = $argument?.Cookie;
   const mconfig = $argument?.MConfigInfo;
   const userAgent = $argument?.UserAgent;
+
 
   // 检查参数是否缺失
   if (!cookie || !mconfig || !userAgent) {
