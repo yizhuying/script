@@ -24,7 +24,7 @@ electronicWarrantyCard=switch, true,tag=[显示]电子保修卡
 # 底部导航：仅保留 Robot / Mine
 ^https:\/\/gl-cn-api\.ecovacs\.cn\/v3\/private\/CN\/ZH_CN\/.*\/common\/getBottomNavigateInfoList response-body-json-jq 'if .data and (.data.navigateInfoResponseList | type == "array") then .data.navigateInfoResponseList |= map(select(.positionType=="Robot" or .positionType=="Mine")) else . end'
 
-^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getMemberInfo response-body-json-replace .data.paidMemberInfo.paidMemberStatus  "OPEN"
+^https:\/\/gl-cn-api\.ecovacs\.cn\/v1\/private\/CN\/ZH_CN\/.*\/getMemberInfo response-body-json-jq '.data.paidMemberInfo.paidMemberStatus = "OPEN"',enable=false
 
 [Script]
 # 我的页面菜单：按 Argument 开关过滤
